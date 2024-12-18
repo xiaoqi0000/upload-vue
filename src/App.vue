@@ -6,10 +6,11 @@ import Header from './components/header.vue'
 <template>
   <Header />
   <div class="content list">
-    <transition name="el-fade-in-linear">
-      <router-view></router-view>
-    </transition>
-
+    <router-view v-slot="{ Component }">
+  <transition name="el-fade-in-linear" mode="out-in">
+    <component :is="Component" />
+  </transition>
+</router-view>
   </div>
 </template>
 
@@ -23,4 +24,5 @@ import Header from './components/header.vue'
   margin-top: 50px;
   margin-bottom: 100px;
 }
+
 </style>
