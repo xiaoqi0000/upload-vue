@@ -1,0 +1,61 @@
+{
+    "data": {
+        "name": "全部文件",
+        "allDate": [
+            {
+                "date": "8月15日",
+                "allFileName": [
+                    {
+                        "title": "小狗.png"
+                    },
+                    {
+                        "title": "大狗.png"
+                    },
+                    {
+                        "title": "我的程序.exe"
+                    },
+                    {
+                        "title": "文档1.docx"
+                    },
+                    {
+                        "title": "图片1.jpg"
+                    }
+                ]
+            },
+            {
+                "date": "8月16日",
+                "allFileName": [
+                    {
+                        "title": "小狗.png"
+                    },
+                    {
+                        "title": "大狗.png"
+                    },
+                    {
+                        "title": "我的程序.exe"
+                    },
+                    {
+                        "title": "表格1.xlsx"
+                    },
+                    {
+                        "title": "音乐1.mp3"
+                    }
+                ]
+            },
+            {
+                "date": "8月17日",
+                "allFileName": [
+                    {
+                        "title": "视频1.mp4"
+                    },
+                    {
+                        "title": "文件2.txt"
+                    },
+                    {
+                        "title": "图片2.jpg"
+                    }
+                ]
+            }
+        ]
+    }
+}

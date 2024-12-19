@@ -1,6 +1,6 @@
 <template>
 
-<div>
+<div v-loading="isData">
 
   <div class="mt-4">
     <el-input
@@ -27,12 +27,12 @@
     </el-input>
   </div>
 
-  <div class="trunk" v-for="date in data.allDate">
+  <div class="trunk" v-for="date,index in data.allDate" :key="index">
     <el-divider content-position="left" border-style="dashed">{{ date.date }}</el-divider>
     <el-row :gutter="20">
-      <el-col :span="6" v-for="name in date.allFileName">
+      <el-col :span="6" v-for="name,index in date.allFileName" :key="index">
         <div class="item dashed">
-          <img src="../assets/icon/APK.png">
+          <img src="../assets/icon/apk.png">
           <el-text class="mx-1" truncated tag="b">{{name.title}}</el-text>
           <transition name="el-fade-in-linear">
             <div class="button"><el-button round type="info">下载</el-button></div>
@@ -48,12 +48,34 @@
 <script setup lang="ts">
 import { ref,reactive } from 'vue'
 import { Search } from '@element-plus/icons-vue'
+import axios from 'axios';
 const input3 = ref('')
 const select = ref('99')
+interface IData {
+  name: string
+  allDate: Array<{
+    date: string
+    allFileName: Array<{
+      title: string
+    }>
+  }>
+}
+let url = 'http://127.0.0.1:3000/data';
 
-//临时数据
-let originalData = {"name":"全部文件","allDate":[{"date":"8月15日","allFileName":[{"title":"小狗.png"},{"title":"大狗.png"},{"title":"我的程序.exe"},{"title":"文档1.docx"},{"title":"图片1.jpg"}]},{"date":"8月16日","allFileName":[{"title":"小狗.png"},{"title":"大狗.png"},{"title":"我的程序.exe"},{"title":"表格1.xlsx"},{"title":"音乐1.mp3"}]},{"date":"8月17日","allFileName":[{"title":"视频1.mp4"},{"title":"文件2.txt"},{"title":"图片2.jpg"}]}]}
-let data = reactive(originalData)
+
+
+
+let isData = ref(true);
+axios.get(url).then(res => {
+  Object.assign(data,res.data)
+  isData.value = false;
+}) 
+
+
+let data = reactive<IData>({
+  name: "无",
+  allDate: []}
+)
 
 
 </script>
