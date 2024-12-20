@@ -4,6 +4,7 @@
 
   <div class="mt-4">
     <el-input
+      @change="fuzzySearch"
       v-model="input3"
       style="max-width: 600px"
       placeholder="请输入"
@@ -11,18 +12,14 @@
     >
       <template #prepend>
         <el-select v-model="select" placeholder="全部" style="width: 115px">
-          <el-option label="全部" value="99" />
-          <el-option label="周日" value="0" />
-          <el-option label="周一" value="1" />
-          <el-option label="周二" value="2" />
-          <el-option label="周三" value="3" />
-          <el-option label="周四" value="4" />
-          <el-option label="周五" value="5" />
-          <el-option label="周六" value="6" />
+          <el-option label="全部" value="all" />
+          <el-option label="图片" value="img" />
+          <el-option label="文档" value="office" />
+          <el-option label="其他" value="other" />
         </el-select>
       </template>
       <template #append>
-        <el-button :icon="Search" />
+        <el-button @click = fuzzySearch(input3) :icon="Search" />
       </template>
     </el-input>
   </div>
@@ -32,12 +29,11 @@
     <el-row :gutter="20">
       <el-col :span="6" v-for="name,index in date.allFileName" :key="index">
         <div class="item dashed">
-          <img src="../assets/icon/apk.png">
+          <img :src="imgUrl(name)">
           <el-text class="mx-1" truncated tag="b">{{name.title}}</el-text>
           <transition name="el-fade-in-linear">
             <div class="button"><el-button round type="info">下载</el-button></div>
           </transition>
-          
         </div>
       </el-col>
     </el-row>
@@ -46,11 +42,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref,reactive } from 'vue'
+import { ref,reactive,watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import axios from 'axios';
-const input3 = ref('')
-const select = ref('99')
 interface IData {
   name: string
   allDate: Array<{
@@ -60,13 +54,16 @@ interface IData {
     }>
   }>
 }
-let url = 'http://127.0.0.1:3000/data';
 
+let url = 'http://127.0.0.1:1111/data';
 
+const input3 = ref('')
 
 
 let isData = ref(true);
+let originalData:IData
 axios.get(url).then(res => {
+  originalData = res.data
   Object.assign(data,res.data)
   isData.value = false;
 }) 
@@ -77,6 +74,95 @@ let data = reactive<IData>({
   allDate: []}
 )
 
+//图片显示
+function imgUrl(val: { title: string }): string {
+    let ext = val.title.split('.').pop();
+    let finalUrl = `/icon/${ext}.png`;
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext || '')) {
+      finalUrl = `/icon/image.png`;
+    }
+    let img = new Image();
+    img.src = finalUrl;
+    img.onerror = function () {
+    // console.log(finalUrl,'图片加载失败');
+      finalUrl = `/icon/1.png`;
+    };
+    return finalUrl;
+}
+
+//筛选功能
+const select = ref('all')
+
+const stopWatch = watch(select,(newValue,oldValue)=>{
+  // console.log('sum变化了',newValue,oldValue)
+  input3.value = ''
+  let newDate:IData =  JSON.parse(JSON.stringify(originalData))
+  // console.log(newDate,originalData);
+  
+  newDate.allDate.forEach((item,index)=>{
+    item.allFileName = item.allFileName.filter((item)=>{
+      if(newValue == 'all'){
+        return true
+      }else if(newValue == 'img'){
+        let ext = item.title.split('.').pop();
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext || '')) {
+          return true
+        }else{
+          return false
+        }
+      }else if(newValue == 'office'){
+        let ext = item.title.split('.').pop();
+        if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext || '')) {
+          return true
+        }else{
+          return false
+        }
+      }else if(newValue == 'other'){
+        let ext = item.title.split('.').pop();
+        if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx','jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext || '')) {
+          return false
+        }else{
+          return true
+        }
+      }else{
+        return true
+      }
+    })
+    if(item.allFileName.length == 0){
+      newDate.allDate.splice(index,1)
+    }
+
+  })
+  newDate = JSON.parse(JSON.stringify(newDate))
+  Object.assign(data,newDate)
+})
+
+// 搜索功能
+function fuzzySearch(val:any) {
+  // console.log('输入框的值发生了变化',val);
+  let newData:IData =  JSON.parse(JSON.stringify(data))
+  newData.allDate.forEach((item,index)=>{
+    item.allFileName = item.allFileName.filter((item)=>{
+      if(item.title.includes(val)){
+        return true
+      }else{
+        return false
+      }
+    })
+  })
+  console.log('3',newData);
+  newData.allDate = newData.allDate.filter((item)=>{
+    if(item.allFileName.length == 0){
+      return false
+    }else{
+      return true
+    }
+  })
+  
+  newData = JSON.parse(JSON.stringify(newData))
+  Object.assign(data,newData)
+  
+}
 
 </script>
 
@@ -105,6 +191,7 @@ let data = reactive<IData>({
 .item img {
   margin-top: 5px;
   width: 40px;
+  height: 40px;
 }
 .mx-1 {
   transform: translateX(12px) translateY(-16px);
