@@ -29,7 +29,7 @@
     <el-row :gutter="20">
       <el-col :span="6" v-for="name,index in date.allFileName" :key="index">
         <div class="item dashed">
-          <img :src="imgUrl(name)">
+          <img :src="imgUrl(name,$)">
           <el-text class="mx-1" truncated tag="b">{{name.title}}</el-text>
           <transition name="el-fade-in-linear">
             <div class="button"><el-button round type="info">下载</el-button></div>
@@ -75,7 +75,7 @@ let data = reactive<IData>({
 )
 
 //图片显示
-function imgUrl(val: { title: string }): string {
+function imgUrl(val: { title: string },el:any): string {
     let ext = val.title.split('.').pop();
     let finalUrl = `/icon/${ext}.png`;
     if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext || '')) {
@@ -84,8 +84,14 @@ function imgUrl(val: { title: string }): string {
     let img = new Image();
     img.src = finalUrl;
     img.onerror = function () {
-    // console.log(finalUrl,'图片加载失败');
-      finalUrl = `/icon/1.png`;
+      //遍历所有img标签
+      let imgs = document.getElementsByTagName('img');
+      for (let i = 0; i < imgs.length; i++) {
+        if (imgs[i].src.includes(`/icon/${ext}.png`)) {
+          imgs[i].src = `/icon/1.png`;
+        }
+      }
+
     };
     return finalUrl;
 }
@@ -139,7 +145,7 @@ const stopWatch = watch(select,(newValue,oldValue)=>{
 
 // 搜索功能
 function fuzzySearch(val:any) {
-  // console.log('输入框的值发生了变化',val);
+  // console.log('模糊搜索',val);
   let newData:IData =  JSON.parse(JSON.stringify(data))
   newData.allDate.forEach((item,index)=>{
     item.allFileName = item.allFileName.filter((item)=>{
