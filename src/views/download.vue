@@ -29,10 +29,10 @@
     <el-row :gutter="20">
       <el-col :span="6" v-for="name,index in date.allFileName" :key="index">
         <div class="item dashed">
-          <img :src="imgUrl(name,$)">
-          <el-text class="mx-1" truncated tag="b">{{name.title}}</el-text>
+          <img :src="imgUrl(name)">
+          <el-text class="mx-1" line-clamp="1" truncated tag="b">{{name.title}}</el-text>
           <transition name="el-fade-in-linear">
-            <div class="button"><el-button round type="info">下载</el-button></div>
+            <div class="button"> <a :href="`/uploads/${name.filename}`" :download="name.title"><el-button round type="info">下载</el-button></a></div>
           </transition>
         </div>
       </el-col>
@@ -45,17 +45,20 @@
 import { ref,reactive,watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import axios from 'axios';
+
+//定义返回接口数据类型接口
 interface IData {
   name: string
   allDate: Array<{
     date: string
     allFileName: Array<{
-      title: string
+      title: string,
+      filename: string
     }>
   }>
 }
 
-let url = 'http://127.0.0.1:1111/data';
+let url = '/downloadFile';
 
 const input3 = ref('')
 
@@ -63,8 +66,9 @@ const input3 = ref('')
 let isData = ref(true);
 let originalData:IData
 axios.get(url).then(res => {
-  originalData = res.data
-  Object.assign(data,res.data)
+  originalData = res.data.data;
+  console.log(res.data.data,'获取数据');
+  Object.assign(data,originalData)
   isData.value = false;
 }) 
 
@@ -75,7 +79,7 @@ let data = reactive<IData>({
 )
 
 //图片显示
-function imgUrl(val: { title: string },el:any): string {
+function imgUrl(val: { title: string }): string {
     let ext = val.title.split('.').pop();
     let finalUrl = `/icon/${ext}.png`;
     if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext || '')) {
@@ -103,8 +107,6 @@ const stopWatch = watch(select,(newValue,oldValue)=>{
   // console.log('sum变化了',newValue,oldValue)
   input3.value = ''
   let newDate:IData =  JSON.parse(JSON.stringify(originalData))
-  // console.log(newDate,originalData);
-  
   newDate.allDate.forEach((item,index)=>{
     item.allFileName = item.allFileName.filter((item)=>{
       if(newValue == 'all'){
@@ -170,6 +172,7 @@ function fuzzySearch(val:any) {
   
 }
 
+
 </script>
 
 <style>
@@ -183,7 +186,7 @@ function fuzzySearch(val:any) {
 .trunk {
   margin-top: 30px;
 }
-/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
+
 @font-face {
   font-family: 'iconfont';  /* Project id 4786717 */
   src: url('//at.alicdn.com/t/c/font_4786717_mxq07jfq3le.woff2?t=1734522419043') format('woff2'),
@@ -191,7 +194,7 @@ function fuzzySearch(val:any) {
        url('//at.alicdn.com/t/c/font_4786717_mxq07jfq3le.ttf?t=1734522419043') format('truetype');
 }
 .item {
-   margin-top: 20px;
+  margin-top: 20px;
   position: relative;
 }
 .item img {
@@ -200,7 +203,10 @@ function fuzzySearch(val:any) {
   height: 40px;
 }
 .mx-1 {
-  transform: translateX(12px) translateY(-16px);
+  width: 126px;
+  position: absolute;
+  top: 12px;
+  left: 50px;
 }
 .item .button {
   display: none;

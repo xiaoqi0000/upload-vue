@@ -15,4 +15,24 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    proxy: {
+      '/uploadFile': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/uploadFile/, '/uploadFile')
+      },
+      '/downloadFile': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/downloadFile/, '/uploadFile')
+      },
+      '/uploads': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/downloadFile/, '/uploadFile')
+      },
+
+    }
+  },
 })
